@@ -34,6 +34,9 @@ pub async fn start_viewer_client(address: &str) {
         // Read frame data from the server
         match stream.read_exact(&mut received_data).await {
             Ok(_) => {
+                // Log the size of the received frame
+                println!("Received frame from server: {} bytes", received_data.len());
+
                 // Convert the raw BGRA data into the u32 buffer for minifb
                 for (i, chunk) in received_data.chunks(4).enumerate() {
                     let b = chunk[0] as u32;
@@ -54,3 +57,4 @@ pub async fn start_viewer_client(address: &str) {
         }
     }
 }
+

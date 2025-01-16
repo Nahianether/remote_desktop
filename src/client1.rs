@@ -13,9 +13,14 @@ pub async fn start_source_client(address: &str) {
 
     loop {
         let screen_data = capture_screen(); // Capture the screen
+
+        // Log the size of the screen data
+        println!("Captured screen data of size: {}", screen_data.len());
+
         if stream.write_all(&screen_data).await.is_err() {
             println!("Failed to send screen data to server.");
             break;
         }
     }
 }
+
