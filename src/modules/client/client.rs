@@ -1,9 +1,12 @@
-use tokio::net::TcpStream;
-use tokio::io::AsyncReadExt; // Import this for async read operations
 use minifb::{Window, WindowOptions};
+use tokio::io::AsyncReadExt;
+use tokio::net::TcpStream;
 
-const WIDTH: usize = 1920;  // Set the screen width
-const HEIGHT: usize = 1080; // Set the screen height
+const WIDTH: usize = 1920;
+const HEIGHT: usize = 1080;
+
+// const WIDTH: usize = 400;
+// const HEIGHT: usize = 300;
 
 pub async fn start_client(address: &str) {
     let mut stream = TcpStream::connect(address)

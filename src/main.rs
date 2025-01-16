@@ -1,8 +1,8 @@
-mod screen_capture;
-mod server;
-mod client;
+mod modules;
 
 use std::env;
+
+use modules::{client::client, server::server};
 
 #[tokio::main]
 async fn main() {
