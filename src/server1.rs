@@ -39,9 +39,6 @@ async fn handle_connection(mut socket: TcpStream, tx: broadcast::Sender<Vec<u8>>
 
         // Continuously read screen data from the source and broadcast it
         while let Ok(_) = socket.read_exact(&mut frame).await {
-            // Log the size of the received frame
-            println!("Received screen data from source: {} bytes", frame.len());
-
             if tx.send(frame.clone()).is_err() {
                 println!("No viewers are connected.");
             }
@@ -53,9 +50,6 @@ async fn handle_connection(mut socket: TcpStream, tx: broadcast::Sender<Vec<u8>>
 
         // Continuously forward screen data to the viewer
         while let Ok(frame) = rx.recv().await {
-            // Log the size of the frame being sent to the viewer
-            println!("Sending screen data to viewer: {} bytes", frame.len());
-
             if socket.write_all(&frame).await.is_err() {
                 println!("Viewer disconnected.");
                 break;
@@ -63,4 +57,3 @@ async fn handle_connection(mut socket: TcpStream, tx: broadcast::Sender<Vec<u8>>
         }
     }
 }
-
