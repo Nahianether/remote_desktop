@@ -1,15 +1,25 @@
-use tokio::net::TcpStream;
-use tokio::io::AsyncWriteExt;
 use crate::screen_capture1::capture_screen;
+use tokio::io::AsyncWriteExt;
+use tokio::net::TcpStream;
 
-pub async fn start_source_client(address: &str) {
+pub async fn start_source_client(address: &str, user_id: &str) {
     let mut stream = TcpStream::connect(address)
         .await
         .expect("Failed to connect to server");
     println!("Connected to server as source client.");
 
     // Send client type to the server
-    stream.write_all(b"SOURCE\n").await.expect("Failed to send client type");
+    stream
+        .write_all(b"SOURCE\n")
+        .await
+        .expect("Failed to send client type");
+
+    // Send user ID to the server
+    let user_id_bytes = format!("{:<64}", user_id).into_bytes(); // Pad to 64 bytes
+    stream
+        .write_all(&user_id_bytes)
+        .await
+        .expect("Failed to send user ID");
 
     loop {
         let screen_data = capture_screen(); // Capture the screen
