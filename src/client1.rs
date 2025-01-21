@@ -8,13 +8,11 @@ pub async fn start_source_client(address: &str, user_id: &str) {
         .expect("Failed to connect to server");
     println!("Connected to server as source client.");
 
-    // Send client type to the server
+    // Send client type and user ID to the server
     stream
         .write_all(b"SOURCE\n")
         .await
         .expect("Failed to send client type");
-
-    // Send user ID to the server
     let user_id_bytes = format!("{:<64}", user_id).into_bytes(); // Pad to 64 bytes
     stream
         .write_all(&user_id_bytes)
