@@ -9,7 +9,11 @@ pub fn capture_screen() -> Vec<u8> {
     let frame = loop {
         match capturer.frame() {
             Ok(buffer) => {
-                println!("Captured screen frame with size: {} bytes", buffer.len()); // Debug log
+                println!(
+                    "Captured screen frame with size: {} bytes, first 16 bytes: {:?}",
+                    buffer.len(),
+                    &buffer[..16]
+                );
                 break buffer.to_vec();
             }
             Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {

@@ -73,11 +73,11 @@ pub async fn start_viewer_client(address: &str, user_id: &str) {
         .expect("Failed to send user ID");
 
     // Create a persistent minifb window
-    let mut window = Window::new(
+    let mut window = minifb::Window::new(
         "Remote Desktop Viewer",
         1920,
         1080,
-        WindowOptions::default(),
+        minifb::WindowOptions::default(),
     )
     .expect("Failed to create window");
 
@@ -90,18 +90,31 @@ pub async fn start_viewer_client(address: &str, user_id: &str) {
         if let Ok(_) = stream.read_exact(&mut received_data).await {
             println!("Received frame from server: {} bytes", received_data.len());
 
+            // Log the first few bytes of the frame data for debugging
+            println!(
+                "First 16 bytes of received data: {:?}",
+                &received_data[..16]
+            );
+
             // Convert BGRA to RGB
             for (i, chunk) in received_data.chunks(4).enumerate() {
                 let b = chunk[0] as u32;
                 let g = chunk[1] as u32;
                 let r = chunk[2] as u32;
                 buffer[i] = (r << 16) | (g << 8) | b; // Convert BGRA to RGB
+
+                // Debug log for the first few pixels
+                if i < 10 {
+                    println!("Pixel {}: R={}, G={}, B={}", i, r, g, b);
+                }
             }
 
             // Update the window with the new frame
             window
                 .update_with_buffer(&buffer, 1920, 1080)
                 .expect("Failed to update window buffer");
+        } else {
+            println!("Failed to receive frame from server.");
         }
     }
 }
