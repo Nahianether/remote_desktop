@@ -101,12 +101,8 @@ pub async fn start_viewer_client(address: &str, user_id: &str) {
                 let b = chunk[0] as u32;
                 let g = chunk[1] as u32;
                 let r = chunk[2] as u32;
+                let a = chunk[3] as u32; // Alpha channel (not used)
                 buffer[i] = (r << 16) | (g << 8) | b; // Convert BGRA to RGB
-
-                // Debug log for the first few pixels
-                if i < 10 {
-                    println!("Pixel {}: R={}, G={}, B={}", i, r, g, b);
-                }
             }
 
             // Update the window with the new frame

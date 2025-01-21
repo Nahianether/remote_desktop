@@ -2,9 +2,10 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
+use tokio::sync::broadcast;
 use tokio::sync::{mpsc, Mutex};
 
-type Clients = Arc<Mutex<HashMap<String, mpsc::Sender<mpsc::Sender<Vec<u8>>>>>>;
+type Clients = Arc<Mutex<HashMap<String, broadcast::Sender<Vec<u8>>>>>;
 
 pub async fn start_server(address: &str) {
     let listener = TcpListener::bind(address)
@@ -12,8 +13,7 @@ pub async fn start_server(address: &str) {
         .expect("Failed to bind address");
     println!("Server is running on {}", address);
 
-    // Use tokio::sync::Mutex instead of std::sync::Mutex
-    let clients: Clients = Arc::new(Mutex::new(HashMap::new())); // Shared clients registry
+    let clients: Clients = Arc::new(Mutex::new(HashMap::new()));
 
     loop {
         let (socket, _) = listener
@@ -22,7 +22,6 @@ pub async fn start_server(address: &str) {
             .expect("Failed to accept connection");
         let clients_clone = clients.clone();
 
-        // Spawn a task to handle the connection
         tokio::spawn(async move {
             handle_connection(socket, clients_clone).await;
         });
@@ -42,16 +41,17 @@ async fn handle_connection(mut socket: TcpStream, clients: Clients) {
     let client_type = String::from_utf8_lossy(&buf[..6]).trim().to_string();
 
     if client_type == "SOURCE" {
-        handle_source_client(socket, clients).await; // Handle a source client
+        // Clone `clients` before passing it
+        handle_source_client(socket, clients.clone()).await; // Handle a source client
     } else if client_type == "VIEWER" {
-        handle_viewer_client(socket, clients).await; // Handle a viewer client
+        // Clone `clients` before passing it
+        handle_viewer_client(socket, clients.clone()).await; // Handle a viewer client
     } else {
         println!("Unknown client type: {}", client_type);
     }
 }
 
 async fn handle_source_client(mut socket: TcpStream, clients: Clients) {
-    // Source client sends its user ID
     let mut buf = vec![0; 64];
     if socket.read_exact(&mut buf[..64]).await.is_err() {
         println!("Failed to receive user ID from source client.");
@@ -60,8 +60,7 @@ async fn handle_source_client(mut socket: TcpStream, clients: Clients) {
     let user_id = String::from_utf8_lossy(&buf[..64]).trim().to_string();
     println!("Source client connected with user ID: {}", user_id);
 
-    // Create a channel for the source client
-    let (tx, mut rx) = mpsc::channel::<mpsc::Sender<Vec<u8>>>(10);
+    let (tx, _rx) = tokio::sync::broadcast::channel::<Vec<u8>>(10);
 
     // Register the source client in the shared hashmap
     let mut clients_guard = clients.lock().await;
@@ -72,9 +71,10 @@ async fn handle_source_client(mut socket: TcpStream, clients: Clients) {
     while let Ok(_) = socket.read_exact(&mut frame).await {
         println!("Received screen frame from source: {} bytes", frame.len());
 
-        // Forward the screen frame to all connected viewers
-        while let Some(viewer_tx) = rx.recv().await {
-            if viewer_tx.send(frame.clone()).await.is_err() {
+        // Forward frames to viewers
+        let clients_guard = clients.lock().await;
+        for viewer_tx in clients_guard.values() {
+            if viewer_tx.send(frame.clone()).is_err() {
                 println!("Viewer disconnected while receiving screen data.");
             }
         }
@@ -82,8 +82,7 @@ async fn handle_source_client(mut socket: TcpStream, clients: Clients) {
 
     println!("Source client disconnected: {}", user_id);
 
-    // Remove source client from registry
-    let mut clients_guard = clients.lock().await;
+    // Remove the source client from the registry
     clients_guard.remove(&user_id);
 }
 
@@ -100,14 +99,10 @@ async fn handle_viewer_client(mut socket: TcpStream, clients: Clients) {
     if let Some(source_tx) = clients_guard.get(&user_id) {
         println!("Found source client with user ID: {}", user_id);
 
-        let (viewer_tx, mut viewer_rx) = mpsc::channel::<Vec<u8>>(10);
-        if source_tx.send(viewer_tx).await.is_err() {
-            println!("Source client disconnected: {}", user_id);
-            return;
-        }
-
-        while let Some(frame) = viewer_rx.recv().await {
-            println!("Forwarding frame to viewer: {} bytes", frame.len()); // Debug log
+        let mut source_rx = source_tx.subscribe();
+        // Continuously forward frames from the source to the viewer
+        while let Ok(frame) = source_rx.recv().await {
+            println!("Forwarding frame to viewer: {} bytes", frame.len());
             if socket.write_all(&frame).await.is_err() {
                 println!("Viewer disconnected.");
                 break;
