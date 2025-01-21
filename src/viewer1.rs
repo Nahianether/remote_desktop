@@ -72,27 +72,36 @@ pub async fn start_viewer_client(address: &str, user_id: &str) {
         .await
         .expect("Failed to send user ID");
 
-    let mut buffer = vec![0u32; 1920 * 1080];
+    // Create a persistent minifb window
+    let mut window = Window::new(
+        "Remote Desktop Viewer",
+        1920,
+        1080,
+        WindowOptions::default(),
+    )
+    .expect("Failed to create window");
+
+    window.limit_update_rate(Some(std::time::Duration::from_micros(16600))); // ~60 FPS
+
+    let mut buffer = vec![0u32; 1920 * 1080]; // Buffer for RGB data
     let mut received_data = vec![0; 1920 * 1080 * 4]; // Raw BGRA data
 
-    while let Ok(_) = stream.read_exact(&mut received_data).await {
-        println!("Received frame from server: {} bytes", received_data.len()); // Debug log
+    while window.is_open() && !window.is_key_down(minifb::Key::Escape) {
+        if let Ok(_) = stream.read_exact(&mut received_data).await {
+            println!("Received frame from server: {} bytes", received_data.len());
 
-        for (i, chunk) in received_data.chunks(4).enumerate() {
-            let b = chunk[0] as u32;
-            let g = chunk[1] as u32;
-            let r = chunk[2] as u32;
-            buffer[i] = (r << 16) | (g << 8) | b; // Convert BGRA to RGB
+            // Convert BGRA to RGB
+            for (i, chunk) in received_data.chunks(4).enumerate() {
+                let b = chunk[0] as u32;
+                let g = chunk[1] as u32;
+                let r = chunk[2] as u32;
+                buffer[i] = (r << 16) | (g << 8) | b; // Convert BGRA to RGB
+            }
+
+            // Update the window with the new frame
+            window
+                .update_with_buffer(&buffer, 1920, 1080)
+                .expect("Failed to update window buffer");
         }
-
-        minifb::Window::new(
-            "Remote Desktop Viewer",
-            1920,
-            1080,
-            minifb::WindowOptions::default(),
-        )
-        .unwrap()
-        .update_with_buffer(&buffer, 1920, 1080)
-        .unwrap();
     }
 }

@@ -51,6 +51,7 @@ async fn handle_connection(mut socket: TcpStream, clients: Clients) {
 }
 
 async fn handle_source_client(mut socket: TcpStream, clients: Clients) {
+    // Source client sends its user ID
     let mut buf = vec![0; 64];
     if socket.read_exact(&mut buf[..64]).await.is_err() {
         println!("Failed to receive user ID from source client.");
@@ -59,14 +60,20 @@ async fn handle_source_client(mut socket: TcpStream, clients: Clients) {
     let user_id = String::from_utf8_lossy(&buf[..64]).trim().to_string();
     println!("Source client connected with user ID: {}", user_id);
 
+    // Create a channel for the source client
     let (tx, mut rx) = mpsc::channel::<mpsc::Sender<Vec<u8>>>(10);
+
+    // Register the source client in the shared hashmap
     let mut clients_guard = clients.lock().await;
     clients_guard.insert(user_id.clone(), tx);
 
+    // Handle incoming screen data from the source client
     let mut frame = vec![0; 1920 * 1080 * 4]; // Assuming 1920x1080 resolution
     while let Ok(_) = socket.read_exact(&mut frame).await {
-        println!("Received screen frame from source: {} bytes", frame.len()); // Debug log
-        if let Some(viewer_tx) = rx.recv().await {
+        println!("Received screen frame from source: {} bytes", frame.len());
+
+        // Forward the screen frame to all connected viewers
+        while let Some(viewer_tx) = rx.recv().await {
             if viewer_tx.send(frame.clone()).await.is_err() {
                 println!("Viewer disconnected while receiving screen data.");
             }
@@ -75,6 +82,7 @@ async fn handle_source_client(mut socket: TcpStream, clients: Clients) {
 
     println!("Source client disconnected: {}", user_id);
 
+    // Remove source client from registry
     let mut clients_guard = clients.lock().await;
     clients_guard.remove(&user_id);
 }
