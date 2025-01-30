@@ -1,0 +1,60 @@
+name: Auto-Generate README
+
+on:
+  push:
+    branches:
+      - master  # Runs when code is pushed to the master branch
+  workflow_dispatch:  # Allows manual triggering from GitHub Actions UI
+
+permissions:
+  contents: write  # Grants write permissions to GITHUB_TOKEN
+
+jobs:
+  generate-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Generate README Dynamically
+        run: |
+          REPO_NAME="${{ github.repository }}"  # Get repository name
+          BRANCH_NAME="${{ github.ref_name }}"  # Get branch name
+
+          # Infer repository description based on its name
+          if [[ "$REPO_NAME" == *"rust_ids"* ]]; then
+            DESCRIPTION="This repository manages and catalogs various identifiers related to the Rust programming language."
+          else
+            DESCRIPTION="This repository is related to the Rust programming language."
+          fi
+
+          # Generate commit history (last 5 commits)
+          COMMIT_HISTORY=$(git log -5 --pretty=format:"- %h %s (%cr) by %an")
+
+          echo "# 📌 ${REPO_NAME}" > README.md
+          echo "🚀 ${DESCRIPTION}" >> README.md
+          echo "" >> README.md
+          
+          echo "## 🔄 Latest Updates" >> README.md
+          echo "**Branch:** \`${BRANCH_NAME}\`" >> README.md
+          echo "" >> README.md
+          
+          echo "## 📜 Recent Commit History" >> README.md
+          echo "$COMMIT_HISTORY" >> README.md
+          echo "" >> README.md
+
+          echo "## 📂 Repository Structure" >> README.md
+          echo '```' >> README.md
+          ls -R >> README.md
+          echo '```' >> README.md
+
+          echo "" >> README.md
+          echo "🕒 Last updated: $(date)" >> README.md
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions@github.com"
+          git add README.md
+          git commit -m "Automated README update with inferred description" || echo "No changes to commit"
+          git push origin master
