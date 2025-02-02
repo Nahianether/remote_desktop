@@ -18,7 +18,7 @@ pub async fn start_viewer_client(address: &str, target_user_id: &str) {
         .await
         .expect("Failed to send target user ID");
 
-    // Create a minifb window to display the screen
+    // Create a minifb (minifb crates for view) window to display the screen
     let mut window = minifb::Window::new(
         "Remote Desktop Viewer",
         1920,
@@ -27,7 +27,7 @@ pub async fn start_viewer_client(address: &str, target_user_id: &str) {
     )
     .expect("Failed to create window");
 
-    window.limit_update_rate(Some(std::time::Duration::from_micros(16600))); // ~60 FPS
+    window.limit_update_rate(Some(std::time::Duration::from_micros(16600))); // ~60 FPS limit (error occured or buffer drop if decrease from 60)
 
     let mut buffer = vec![0u32; 1920 * 1080];
     let mut received_data = vec![0; 1920 * 1080 * 4];

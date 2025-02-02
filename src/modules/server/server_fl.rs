@@ -23,7 +23,6 @@ pub async fn start_server(address: &str) {
 
         let clients_clone = clients.clone();
 
-        // Spawn a task to handle each client connection
         tokio::spawn(async move {
             handle_connection(socket, clients_clone).await;
         });
@@ -34,7 +33,7 @@ async fn handle_connection(mut socket: TcpStream, clients: Clients) {
     println!("Client connected!");
 
     // Identify the type of client (SOURCE or VIEWER)
-    let mut buf = vec![0; 7]; // Expect exactly 7 bytes ("SOURCE\n" or "VIEWER\n")
+    let mut buf = vec![0; 7]; // Expect 7 bytes ("SOURCE\n" or "VIEWER\n")
     if socket.read_exact(&mut buf).await.is_err() {
         println!("Failed to identify client type.");
         return;
@@ -58,11 +57,7 @@ async fn handle_connection(mut socket: TcpStream, clients: Clients) {
     }
 }
 
-async fn handle_source_client(
-    mut socket: TcpStream,
-    user_id: String,
-    clients: Clients,
-) {
+async fn handle_source_client(mut socket: TcpStream, user_id: String, clients: Clients) {
     println!("Source client connected with user ID: {}", user_id);
 
     // Create a broadcast channel for this source
@@ -71,10 +66,10 @@ async fn handle_source_client(
     // Register the source in the clients registry
     let mut clients_guard = clients.lock().await;
     clients_guard.insert(user_id.clone(), tx.clone());
-    drop(clients_guard); // Release the lock
+    drop(clients_guard); // Release lock
 
     // Continuously read frames from the source and broadcast them
-    let mut frame = vec![0; 1920 * 1080 * 4]; // Assuming 1920x1080 resolution
+    let mut frame = vec![0; 1920 * 1080 * 4]; // 1920x1080 resolution
     while let Ok(_) = socket.read_exact(&mut frame).await {
         println!("Received frame from source: {} bytes", frame.len());
         if tx.send(frame.clone()).is_err() {
@@ -89,19 +84,17 @@ async fn handle_source_client(
     clients_guard.remove(&user_id);
 }
 
-async fn handle_viewer_client(
-    mut socket: TcpStream,
-    target_user_id: String,
-    clients: Clients,
-) {
-    println!("Viewer client requested to view user ID: {}", target_user_id);
+async fn handle_viewer_client(mut socket: TcpStream, target_user_id: String, clients: Clients) {
+    println!(
+        "Viewer client requested to view user ID: {}",
+        target_user_id
+    );
 
     // Look up the target source in the registry
     let clients_guard = clients.lock().await;
     if let Some(tx) = clients_guard.get(&target_user_id) {
         println!("Found source for user ID: {}", target_user_id);
 
-        // Subscribe to the broadcast channel
         let mut rx = tx.subscribe();
 
         // Continuously send frames to the viewer

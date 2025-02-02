@@ -1,17 +1,21 @@
-mod screen_capture1;
-mod server1;
-mod client1;
-mod viewer1;
+pub mod modules;
 
 use std::env;
 
+use modules::{
+    client::client_fl::start_source_client, server::server_fl::start_server,
+    viewer::viewer_fl::start_viewer_client,
+};
+
 #[tokio::main]
 async fn main() {
-    // Parse command-line arguments
     let args: Vec<String> = env::args().collect();
 
     if args.len() < 2 {
-        eprintln!("Usage: {} <server|source|viewer> [address] [user_id]", args[0]);
+        eprintln!(
+            "Usage: {} <server|source|viewer> [address] [user_id]",
+            args[0]
+        );
         return;
     }
 
@@ -22,7 +26,7 @@ async fn main() {
         "server" => {
             // Start the server to handle source and viewer connections
             println!("Starting server on address: {}", address);
-            server1::start_server(address).await;
+            start_server(address).await;
         }
         "source" => {
             // Start the source client to send screen data
@@ -31,7 +35,7 @@ async fn main() {
                 "Starting source client with user ID: '{}' and connecting to server at {}",
                 user_id, address
             );
-            client1::start_source_client(address, user_id).await;
+            start_source_client(address, user_id).await;
         }
         "viewer" => {
             // Start the viewer client to view screen data
@@ -40,14 +44,14 @@ async fn main() {
                     "Starting viewer client to view user ID: '{}' and connecting to server at {}",
                     user_id, address
                 );
-                viewer1::start_viewer_client(address, user_id).await;
+                start_viewer_client(address, user_id).await;
             } else {
                 eprintln!("Error: Viewer must provide a user ID to view.");
                 eprintln!("Usage: {} viewer [address] [user_id]", args[0]);
             }
         }
         _ => {
-            eprintln!("Invalid mode. Use 'server', 'source', or 'viewer'.");
+            eprintln!("Invalid mode. Use either 'server' or 'source', or 'viewer'.");
         }
     }
 }
