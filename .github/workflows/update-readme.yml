@@ -16,45 +16,101 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Install Dependencies
+        run: sudo apt-get install -y tree  # Install tree for better directory visualization
+
       - name: Generate README Dynamically
         run: |
-          REPO_NAME="${{ github.repository }}"  # Get repository name
-          BRANCH_NAME="${{ github.ref_name }}"  # Get branch name
+          REPO_NAME="remote_desktop"
+          BRANCH_NAME="${{ github.ref_name }}"
 
-          # Infer repository description based on its name
-          if [[ "$REPO_NAME" == *"rust_ids"* ]]; then
-            DESCRIPTION="This repository manages and catalogs various identifiers related to the Rust programming language."
-          else
-            DESCRIPTION="This repository is related to the Rust programming language."
-          fi
-
-          # Generate commit history (last 5 commits)
-          COMMIT_HISTORY=$(git log -5 --pretty=format:"- %h %s (%cr) by %an")
+          DESCRIPTION="🎥 **remote_desktop** is a high-performance **remote desktop streaming** application built in **Rust**, inspired by **TeamViewer**. It allows a **server** to capture a client's screen and stream it to other connected clients in real-time."
 
           echo "# 📌 ${REPO_NAME}" > README.md
           echo "🚀 ${DESCRIPTION}" >> README.md
           echo "" >> README.md
           
-          echo "## 🔄 Latest Updates" >> README.md
-          echo "**Branch:** \`${BRANCH_NAME}\`" >> README.md
+          echo "## 🔥 Features" >> README.md
+          echo "- ✅ **Multi-Client Support**: A single **server** can stream to multiple **clients** simultaneously." >> README.md
+          echo "- ✅ **Real-Time Video Capture**: Uses `scrap` crate to capture screen efficiently." >> README.md
+          echo "- ✅ **Async Data Streaming**: Built on top of **Tokio** for high-speed async communication." >> README.md
+          echo "- ✅ **Efficient Networking**: Uses **TCP/UDP sockets** for seamless transmission." >> README.md
           echo "" >> README.md
           
-          echo "## 📜 Recent Commit History" >> README.md
-          echo "$COMMIT_HISTORY" >> README.md
+          echo "## 🛠 How It Works" >> README.md
+          echo "1. **Server** listens for incoming connections from clients." >> README.md
+          echo "2. **Client** captures its screen using the `scrap` crate." >> README.md
+          echo "3. **Captured frames** are encoded and streamed to the server using **Tokio**." >> README.md
+          echo "4. **Server** receives the video feed and broadcasts it to all connected clients in real-time." >> README.md
+          echo "5. **Clients** can view the live feed from the server." >> README.md
+          echo "" >> README.md
+
+          echo "## 📦 Tech Stack" >> README.md
+          echo "| Component           | Library/Framework |" >> README.md
+          echo "|--------------------|-----------------|" >> README.md
+          echo "| **Screen Capture** | `scrap`         |" >> README.md
+          echo "| **Networking**    | `tokio` (async TCP/UDP) |" >> README.md
+          echo "| **Concurrency**   | `tokio::spawn`, Rust async tasks |" >> README.md
+          echo "| **Serialization** | `bincode`, `serde`  |" >> README.md
+          echo "| **Transport**     | TCP/UDP sockets |" >> README.md
+          echo "" >> README.md
+
+          echo "## 🚀 Getting Started" >> README.md
+          echo "### **🔧 Prerequisites**" >> README.md
+          echo "Ensure you have Rust installed on your system." >> README.md
+          echo '```sh' >> README.md
+          echo "# Install Rust if not already installed" >> README.md
+          echo "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh" >> README.md
+          echo '```' >> README.md
+          echo "" >> README.md
+
+          echo "### **🔹 Running the Server**" >> README.md
+          echo '```sh' >> README.md
+          echo "cargo run --bin server" >> README.md
+          echo '```' >> README.md
+          echo "" >> README.md
+
+          echo "### **🔹 Running the Client**" >> README.md
+          echo '```sh' >> README.md
+          echo "cargo run --bin client" >> README.md
+          echo '```' >> README.md
           echo "" >> README.md
 
           echo "## 📂 Repository Structure" >> README.md
           echo '```' >> README.md
-          ls -R >> README.md
+          tree -L 2 >> README.md  # Show a 2-level directory structure
           echo '```' >> README.md
-
           echo "" >> README.md
+
+          # Generate commit history (last 5 commits)
+          COMMIT_HISTORY=$(git log -5 --pretty=format:"- %h %s (%cr) by %an\n")
+          echo "## 📜 Recent Commit History" >> README.md
+          echo "$COMMIT_HISTORY" >> README.md
+          echo "" >> README.md
+
+          echo "## 🎯 Roadmap & Future Improvements" >> README.md
+          echo "- ✅ Add **encryption** for secure video streaming." >> README.md
+          echo "- ✅ Implement **frame compression** to reduce bandwidth usage." >> README.md
+          echo "- ✅ Introduce **WebRTC/WebSocket** for browser-based streaming." >> README.md
+          echo "- ✅ Develop a **GUI client** for easier user experience." >> README.md
+          echo "" >> README.md
+
+          echo "## 🤝 Contributing" >> README.md
+          echo "Contributions are welcome! Feel free to open issues or pull requests." >> README.md
+          echo "" >> README.md
+
+          echo "## 📜 License" >> README.md
+          echo "MIT License. See [LICENSE](LICENSE) for more details." >> README.md
+          echo "" >> README.md
+
           echo "🕒 Last updated: $(date)" >> README.md
+          echo "" >> README.md
+          echo "_🚀 This README is auto-generated by GitHub Actions._" >> README.md
 
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
           git add README.md
-          git commit -m "Automated README update with inferred description" || echo "No changes to commit"
+          git commit -m "Automated README update for remote_desktop" || echo "No changes to commit"
           git push origin master
