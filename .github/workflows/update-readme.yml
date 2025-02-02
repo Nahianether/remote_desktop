@@ -3,11 +3,11 @@ name: Auto-Generate README
 on:
   push:
     branches:
-      - master  # Runs when code is pushed to the master branch
-  workflow_dispatch:  # Allows manual triggering from GitHub Actions UI
+      - master # Runs when code is pushed to the master branch
+  workflow_dispatch: # Allows manual triggering from GitHub Actions UI
 
 permissions:
-  contents: write  # Grants write permissions to GITHUB_TOKEN
+  contents: write # Grants write permissions to GITHUB_TOKEN
 
 jobs:
   generate-readme:
@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install Dependencies
-        run: sudo apt-get install -y tree  # Install tree for better directory visualization
+        run: sudo apt-get install -y tree # Install tree for better directory visualization
 
       - name: Generate README Dynamically
         run: |
@@ -29,14 +29,14 @@ jobs:
           echo "# 📌 ${REPO_NAME}" > README.md
           echo "🚀 ${DESCRIPTION}" >> README.md
           echo "" >> README.md
-          
+
           echo "## 🔥 Features" >> README.md
           echo "- ✅ **Multi-Client Support**: A single **server** can stream to multiple **clients** simultaneously." >> README.md
           echo "- ✅ **Real-Time Video Capture**: Uses `scrap` crate to capture screen efficiently." >> README.md
           echo "- ✅ **Async Data Streaming**: Built on top of **Tokio** for high-speed async communication." >> README.md
           echo "- ✅ **Efficient Networking**: Uses **TCP/UDP sockets** for seamless transmission." >> README.md
           echo "" >> README.md
-          
+
           echo "## 🛠 How It Works" >> README.md
           echo "1. **Server** listens for incoming connections from clients." >> README.md
           echo "2. **Client** captures its screen using the `scrap` crate." >> README.md
@@ -48,10 +48,10 @@ jobs:
           echo "## 📦 Tech Stack" >> README.md
           echo "| Component           | Library/Framework |" >> README.md
           echo "|--------------------|-----------------|" >> README.md
-          echo "| **Screen Capture** | `scrap`         |" >> README.md
-          echo "| **Networking**    | `tokio` (async TCP/UDP) |" >> README.md
-          echo "| **Concurrency**   | `tokio::spawn`, Rust async tasks |" >> README.md
-          echo "| **Serialization** | `bincode`, `serde`  |" >> README.md
+          echo "| **Capture**       | scrap         |" >> README.md
+          echo "| **Networking**    | tokio (async TCP/UDP) |" >> README.md
+          echo "| **Concurrency**   | tokio::spawn, Rust async tasks |" >> README.md
+          echo "| **Serialization** | bincode, serde  |" >> README.md
           echo "| **Transport**     | TCP/UDP sockets |" >> README.md
           echo "" >> README.md
 
