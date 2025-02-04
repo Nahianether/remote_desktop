@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::helpers::enums::Mode;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+#[serde(rename_all = "camelCase")]
 pub struct UserInfo {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
@@ -15,6 +16,7 @@ pub struct UserInfo {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+#[serde(rename_all = "camelCase")]
 pub struct WSUsers {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub connected: Option<bool>,

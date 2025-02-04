@@ -36,9 +36,11 @@ impl UserInfo {
 pub trait UserExt {
     fn to_ws_user(&self) -> Message;
 }
+
 pub trait UsersExt {
     fn to_ws_users(&self) -> Message;
 }
+
 impl UserExt for UserInfo {
     fn to_ws_user(&self) -> Message {
         let users = serde_json::to_string(&self).unwrap();

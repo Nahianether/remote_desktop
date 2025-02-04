@@ -76,6 +76,21 @@ pub fn get_user(addr: &SocketAddr) -> Option<UserInfo> {
     }
 }
 
+pub fn get_user_by_email(e: &str) -> Option<UserAndUSender> {
+    let set = SOCKET_ADDRS
+        .get_or_init(|| Mutex::new(IndexMap::new()))
+        .lock()
+        .unwrap();
+    match set
+        .clone()
+        .into_iter()
+        .find(|(_, (u, _))| u.is_some() && u.clone().unwrap().user_id == Some(e.to_string()))
+    {
+        Some((_, s)) => Some(s.clone()),
+        None => None,
+    }
+}
+
 pub fn get_all_others(addr: &SocketAddr) -> Vec<UserAndUSender> {
     let set = SOCKET_ADDRS
         .get_or_init(|| Mutex::new(IndexMap::new()))

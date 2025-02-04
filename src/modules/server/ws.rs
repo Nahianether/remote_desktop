@@ -11,8 +11,10 @@ use crate::{
     helpers::{lock::addr::add_socket_addr, ws_functions::ws_disconnected},
     modules::server::{
         connection::{get_existing_connections, new_connection_notify},
-        functions::handle_ws_error,
-        validation::conn_validation,
+        functions::{handle_ws_error, send_ws_err_message},
+        handler::handle_ws_events::handle_ws_events,
+        validations::connection_validation::conn_validation,
+        validations::msg_validation::validate_message_type,
     },
 };
 
@@ -55,14 +57,20 @@ pub async fn handle_connection(raw_stream: TcpStream, addr: SocketAddr) -> Resul
                 match ws_disconnected(&addr ,msg.clone())?{
                   true=>{ break Ok(()); }
                   false=>{
-                    println!("Received a message from {}", addr);
-                    // let message= validate_message_type(msg.clone())?;
-                    // sned_ws_message(message, &addr).await?;
+                    println!("Received a message {} from {}", msg,addr);
+                    match validate_message_type(msg.clone()){
+                      Ok(message)=> {
+                        handle_ws_events(message, &addr).await?;
+                      }
+                      Err(e)=> {
+                        send_ws_err_message(&mut ws_writer, e.to_string()).await?;
+                      }
+                    }
                   }
                 }
               }
               Err(e) => {
-                handle_ws_error(ws_writer, &addr, &e).await?;
+                handle_ws_error(&mut ws_writer, &addr, &e).await?;
                 break Ok(())
               }
             }

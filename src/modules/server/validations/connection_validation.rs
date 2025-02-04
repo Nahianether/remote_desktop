@@ -6,7 +6,7 @@ use tokio_tungstenite::tungstenite::{
 
 use crate::{
     helpers::{
-        constraint::{API_KEY, USER_ID, USER_MODE, WS_AUTH},
+        constraint::{constraint::API_KEY, flags::*},
         enums::Mode,
         lock::addr::add_socket_addr,
     },

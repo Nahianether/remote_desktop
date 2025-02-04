@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::models::user::UserInfo;
+use crate::models::{share::SSRequest, user::UserInfo};
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Mode {
     Server,
@@ -13,4 +13,12 @@ pub enum WsMsgType {
     NewConn(UserInfo),
     DisConn(UserInfo),
     Error(String),
+    SSReq(SSRequest),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+#[serde(rename_all = "camelCase")]
+pub enum SSReqType {
+    Start,
+    Stop,
 }

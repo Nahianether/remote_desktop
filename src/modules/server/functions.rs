@@ -8,7 +8,7 @@ use crate::helpers::{
 };
 
 pub async fn handle_ws_error(
-    mut ws_writer: WsWriter,
+    ws_writer: &mut WsWriter,
     addr: &SocketAddr,
     e: &Error,
 ) -> Result<bool> {
@@ -30,5 +30,16 @@ pub async fn handle_ws_error(
                 .ok();
         }
     }
+    Ok(false)
+}
+
+pub async fn send_ws_err_message(ws_writer: &mut WsWriter, e: String) -> Result<bool> {
+    ws_writer
+        .send(Message::Text(
+            WsMsgType::Error(e.to_string()).to_json()?.into(),
+        ))
+        .await
+        .ok();
+
     Ok(false)
 }

@@ -1,6 +1,7 @@
 pub mod config;
-pub mod functions;
-pub mod server_fl;
-pub mod validation;
-pub mod ws;
 pub mod connection;
+pub mod functions;
+pub mod handler;
+pub mod server_fl;
+pub mod validations;
+pub mod ws;
