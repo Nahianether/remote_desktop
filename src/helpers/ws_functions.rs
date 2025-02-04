@@ -1,8 +1,7 @@
-use anyhow::Result;
 use std::net::SocketAddr;
 use tokio_tungstenite::tungstenite::Message;
 
-use super::lock::addr::remove_socket_addr;
+use crate::modules::server::connection::close_connection_notify;
 
 // pub async fn server_ip_address() -> SocketAddr {
 //     local_server_ip_address().await
@@ -21,9 +20,4 @@ pub fn ws_disconnected(addr: &SocketAddr, msg: Message) -> anyhow::Result<bool> 
         return Ok(true);
     }
     return Ok(false);
-}
-
-pub fn close_connection_notify(addr: &SocketAddr) -> Result<()> {
-    remove_socket_addr(&addr);
-    Ok(())
 }

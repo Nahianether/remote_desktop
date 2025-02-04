@@ -9,7 +9,11 @@ use tokio_tungstenite::tungstenite::{
 
 use crate::{
     helpers::{lock::addr::add_socket_addr, ws_functions::ws_disconnected},
-    modules::server::{functions::handle_slideshow_ws_error, validation::conn_validation},
+    modules::server::{
+        connection::{get_existing_connections, new_connection_notify},
+        functions::handle_ws_error,
+        validation::conn_validation,
+    },
 };
 
 use super::config::ws_config;
@@ -40,6 +44,9 @@ pub async fn handle_connection(raw_stream: TcpStream, addr: SocketAddr) -> Resul
 
     let (mut ws_writer, mut ws_read) = ws_stream.split();
 
+    get_existing_connections(tx.clone(), addr.clone())?;
+    new_connection_notify(&addr)?;
+
     loop {
         tokio::select! {
           Some(msg)= ws_read.next() =>{
@@ -55,7 +62,7 @@ pub async fn handle_connection(raw_stream: TcpStream, addr: SocketAddr) -> Resul
                 }
               }
               Err(e) => {
-                handle_slideshow_ws_error(ws_writer, &addr, &e).await?;
+                handle_ws_error(ws_writer, &addr, &e).await?;
                 break Ok(())
               }
             }

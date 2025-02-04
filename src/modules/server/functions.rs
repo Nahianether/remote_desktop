@@ -7,7 +7,7 @@ use crate::helpers::{
     enum_impl::WsMsgTypeExt, enums::WsMsgType, lock::addr::remove_socket_addr, types::WsWriter,
 };
 
-pub async fn handle_slideshow_ws_error(
+pub async fn handle_ws_error(
     mut ws_writer: WsWriter,
     addr: &SocketAddr,
     e: &Error,

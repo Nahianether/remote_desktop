@@ -13,3 +13,11 @@ pub struct UserInfo {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub addr: Option<SocketAddr>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct WSUsers {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub connected: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub users: Option<Vec<UserInfo>>,
+}
