@@ -22,6 +22,23 @@ pub fn get_all_u_sender() -> Vec<USender> {
         .collect()
 }
 
+pub fn get_all_u_senders_by_emails(emails: Vec<String>) -> Vec<USender> {
+    let set = SOCKET_ADDRS
+        .get_or_init(|| Mutex::new(IndexMap::new()))
+        .lock()
+        .unwrap();
+
+    set.clone()
+        .into_iter()
+        .filter(|(_, (u, _))| {
+            u.is_some()
+                && u.clone().unwrap().user_id.is_some()
+                && emails.contains(&u.clone().unwrap().user_id.unwrap())
+        })
+        .map(|(_, (_, u))| u.unwrap())
+        .collect()
+}
+
 pub fn get_user_and_sender(addr: SocketAddr) -> Option<UserAndUSender> {
     let set = SOCKET_ADDRS
         .get_or_init(|| Mutex::new(IndexMap::new()))

@@ -7,7 +7,7 @@ impl SSRequest {
     pub fn default() -> Self {
         Self {
             ss_req_type: None,
-            user_id: None,
+            client_id: None,
             flag: None,
         }
     }

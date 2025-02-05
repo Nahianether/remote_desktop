@@ -47,6 +47,18 @@ pub fn get_ss_broadcast_admins(client: &String) -> Option<Vec<String>> {
     }
 }
 
+pub fn get_broadcast_admins(client: &String) -> Option<Vec<String>> {
+    let set = BROADCAST_SENDER
+        .get_or_init(|| Mutex::new(IndexMap::new()))
+        .lock()
+        .unwrap();
+
+    match set.get(client) {
+        Some((admins, _)) => Some(admins.clone()),
+        None => None,
+    }
+}
+
 pub fn ss_broadcast_is_active(client: &str) -> bool {
     let set = BROADCAST_SENDER
         .get_or_init(|| Mutex::new(IndexMap::new()))

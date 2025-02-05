@@ -4,10 +4,10 @@ use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
     helpers::{constraint::flags as FLAG, enums::WsMsgType},
-    models::share::SSRequest,
+    models::{share::SSRequest, stream_data::SSStreamData},
 };
 
-use super::ss_req_validation::ss_req_validation;
+use super::{ss_req_validation::ss_req_validation, ss_stream_validation::ss_stream_validation};
 
 pub fn validate_message_type(msg: Message) -> Result<WsMsgType> {
     let msg = msg.to_string();
@@ -20,6 +20,16 @@ pub fn validate_message_type(msg: Message) -> Result<WsMsgType> {
                     Ok(message) => {
                         ss_req_validation(&message)?;
                         Ok(WsMsgType::SSReq(message))
+                    }
+                    Err(_) => bail!("Failed to parse text message"),
+                }
+            }
+            FLAG::SS_STREAM => {
+                let r: Result<SSStreamData, _> = from_value(value);
+                match r {
+                    Ok(message) => {
+                        ss_stream_validation(&message)?;
+                        Ok(WsMsgType::SSStreamData(message))
                     }
                     Err(_) => bail!("Failed to parse text message"),
                 }
