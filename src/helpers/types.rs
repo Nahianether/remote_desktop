@@ -5,7 +5,10 @@ use std::{
 
 use futures_util::stream::SplitSink;
 use indexmap::IndexMap;
-use tokio::{net::TcpStream, sync::mpsc::UnboundedSender};
+use tokio::{
+    net::TcpStream,
+    sync::{broadcast, mpsc::UnboundedSender},
+};
 use tokio_tungstenite::{tungstenite::Message, WebSocketStream};
 
 use crate::models::user::UserInfo;
@@ -17,3 +20,6 @@ pub type IndexMapType = IndexMap<SocketAddr, UserAndUSender>;
 
 pub type SocketIndexMap = OnceLock<Mutex<IndexMapType>>;
 pub type WsWriter = SplitSink<WebSocketStream<TcpStream>, Message>;
+
+pub type BroadcastType = IndexMap<String, (Vec<String>, broadcast::Sender<Vec<u8>>)>;
+pub type BroadcastIndexMap = OnceLock<Mutex<BroadcastType>>;
