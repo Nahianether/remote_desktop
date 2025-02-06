@@ -58,7 +58,7 @@ pub async fn handle_connection(raw_stream: TcpStream, addr: SocketAddr) -> Resul
                 match ws_disconnected(&addr ,msg.clone())?{
                   true=>{ break Ok(()); }
                   false=>{
-                    println!("Received a message {} from {}", msg,addr);
+                    // println!("Received a message {} from {}", msg,addr);
                     match msg {
                         Message::Text(_)=>{
                           match validate_message_type(msg.clone()){

@@ -43,7 +43,7 @@ pub async fn run_admin(admin_id: &str, addr: &str) -> Result<()> {
         let msg = read.next().await.unwrap();
         match msg {
             Ok(msg) => {
-                println!("Received a message: {:?}", msg);
+                // println!("Received a message: {:?}", msg);
                 match msg.clone() {
                     Message::Text(_) => match validate_admin_message_type(msg.clone()) {
                         Ok(message) => {
