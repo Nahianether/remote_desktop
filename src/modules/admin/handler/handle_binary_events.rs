@@ -16,10 +16,12 @@ pub async fn handle_admin_binary_events(
             .collect();
 
         let mut buffer = vec![0u32; 1920 * 1080];
-        for (i, chunk) in received_data.chunks(4).enumerate() {
-            let b = chunk[0] as u32;
-            let g = chunk[1] as u32;
-            let r = chunk[2] as u32;
+
+        for i in 0..(1920 * 1080) {
+            let pixel = received_data[i];
+            let b = (pixel & 0xFF) as u32;
+            let g = ((pixel >> 8) & 0xFF) as u32;
+            let r = ((pixel >> 16) & 0xFF) as u32;
             buffer[i] = (r << 16) | (g << 8) | b;
         }
 

@@ -42,23 +42,25 @@ pub async fn run_admin(admin_id: &str, addr: &str) -> Result<()> {
         //   Some(msg)= read.next() =>{
         let msg = read.next().await.unwrap();
         match msg {
-            Ok(msg) => match msg.clone() {
-                Message::Text(_) => match validate_admin_message_type(msg.clone()) {
-                    Ok(message) => {
-                        println!("Received a message: {:?}", msg);
-                        handle_ws_admin_events(&mut write, message, &addr).await?;
+            Ok(msg) => {
+                println!("Received a message: {:?}", msg);
+                match msg.clone() {
+                    Message::Text(_) => match validate_admin_message_type(msg.clone()) {
+                        Ok(message) => {
+                            handle_ws_admin_events(&mut write, message, &addr).await?;
+                        }
+                        Err(e) => {
+                            println!("{:?}", e)
+                        }
+                    },
+                    Message::Binary(b) => {
+                        handle_admin_binary_events(&mut window, &mut write, b, &addr).await?;
                     }
-                    Err(e) => {
-                        println!("{:?}", e)
+                    _ => {
+                        println!("Received a non-text message: {:?}", msg);
                     }
-                },
-                Message::Binary(b) => {
-                    handle_admin_binary_events(&mut window, &mut write, b, &addr).await?;
                 }
-                _ => {
-                    println!("Received a non-text message: {:?}", msg);
-                }
-            },
+            }
             Err(e) => {
                 println!("Error reading message: {:?}", e);
                 break Ok(());
