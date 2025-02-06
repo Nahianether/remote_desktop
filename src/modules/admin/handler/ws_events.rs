@@ -9,8 +9,8 @@ use anyhow::Result;
 use futures_util::SinkExt;
 use tokio_tungstenite::tungstenite::Message;
 
-pub async fn handle_ws_client_events(
-    writer: &mut WsUserWriter,
+pub async fn handle_ws_admin_events(
+    sender: &mut WsUserWriter,
     message: WsMsgType,
     _addr: &str,
 ) -> Result<()> {
@@ -20,7 +20,7 @@ pub async fn handle_ws_client_events(
             match v.ss_req_type.unwrap() {
                 SSReqType::Start => loop {
                     let screen_data = capture_screen();
-                    writer.send(Message::binary(screen_data)).await?;
+                    sender.send(Message::binary(screen_data)).await?;
                 },
                 SSReqType::Stop => {}
             }

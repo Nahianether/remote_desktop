@@ -25,4 +25,12 @@ impl SSRequest {
     pub fn to_ws(&self) -> Result<Message> {
         Ok(Message::Text(serde_json::to_string(&self)?.into()))
     }
+
+    pub fn new(f: &str, t: SSReqType, client_id: &str) -> Self {
+        Self {
+            flag: Some(f.to_string()),
+            client_id: Some(client_id.to_string()),
+            ss_req_type: Some(t),
+        }
+    }
 }

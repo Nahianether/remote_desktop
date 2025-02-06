@@ -1,6 +1,6 @@
 use crate::{
     helpers::enums::Mode,
-    modules::{client::client::run_client, server::ws::run_ws},
+    modules::{admin::admin::run_admin, client::client::run_client, server::ws::run_ws},
 };
 
 use anyhow::{bail, Result};
@@ -22,7 +22,21 @@ pub async fn run() {
     println!("{:?}", mode);
     match user_mod(mode) {
         Ok(Mode::Server) => run_ws().await,
-        Ok(Mode::Admin) => {}
+        Ok(Mode::Admin) => {
+            if args.len() < 4 {
+                eprintln!(
+                    "Usage: {} <server|admin|client> [address] [user_id]",
+                    args[0]
+                );
+                return;
+            }
+            let socket_addr = args.get(2).map(String::as_str).unwrap();
+            let user_id = args.get(3).map(String::as_str).unwrap();
+            match run_admin(user_id, socket_addr).await {
+                Ok(_) => println!("Admin connection Closed"),
+                Err(e) => eprintln!("{:?}", e),
+            }
+        }
         Ok(Mode::Client) => {
             if args.len() < 4 {
                 eprintln!(

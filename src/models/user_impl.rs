@@ -1,5 +1,5 @@
 use super::user::{UserInfo, WSUsers};
-use crate::helpers::enums::{Mode, WsMsgType};
+use crate::helpers::enums::Mode;
 use std::net::SocketAddr;
 use tokio_tungstenite::tungstenite::Message;
 
