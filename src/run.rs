@@ -1,4 +1,7 @@
-use crate::{helpers::enums::Mode, modules::server::ws::run_ws};
+use crate::{
+    helpers::enums::Mode,
+    modules::{client::client::run_client, server::ws::run_ws},
+};
 
 use anyhow::{bail, Result};
 use std::env;
@@ -20,7 +23,21 @@ pub async fn run() {
     match user_mod(mode) {
         Ok(Mode::Server) => run_ws().await,
         Ok(Mode::Admin) => {}
-        Ok(Mode::Client) => {}
+        Ok(Mode::Client) => {
+            if args.len() < 4 {
+                eprintln!(
+                    "Usage: {} <server|admin|client> [address] [user_id]",
+                    args[0]
+                );
+                return;
+            }
+            let socket_addr = args.get(2).map(String::as_str).unwrap();
+            let user_id = args.get(3).map(String::as_str).unwrap();
+            match run_client(user_id, socket_addr).await {
+                Ok(_) => println!("Client connection Closed"),
+                Err(e) => eprintln!("{:?}", e),
+            }
+        }
         Err(e) => eprintln!("{:?}", e),
     }
 

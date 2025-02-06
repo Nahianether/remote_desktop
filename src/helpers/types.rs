@@ -9,7 +9,7 @@ use tokio::{
     net::TcpStream,
     sync::{broadcast, mpsc::UnboundedSender},
 };
-use tokio_tungstenite::{tungstenite::Message, WebSocketStream};
+use tokio_tungstenite::{tungstenite::Message, MaybeTlsStream, WebSocketStream};
 
 use crate::models::user::UserInfo;
 
@@ -23,3 +23,5 @@ pub type WsWriter = SplitSink<WebSocketStream<TcpStream>, Message>;
 
 pub type BroadcastType = IndexMap<String, (Vec<String>, broadcast::Sender<Vec<u8>>)>;
 pub type BroadcastIndexMap = OnceLock<Mutex<BroadcastType>>;
+
+pub type WsClientSender = SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>;

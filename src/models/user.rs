@@ -19,6 +19,8 @@ pub struct UserInfo {
 #[serde(rename_all = "camelCase")]
 pub struct WSUsers {
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub flag: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub connected: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub users: Option<Vec<UserInfo>>,

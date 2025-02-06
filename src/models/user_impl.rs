@@ -57,7 +57,11 @@ impl UsersExt for Vec<UserInfo> {
 
 impl WSUsers {
     pub fn new(connected: Option<bool>, users: Option<Vec<UserInfo>>) -> Self {
-        Self { connected, users }
+        Self {
+            flag: Some("users".to_string()),
+            connected,
+            users,
+        }
     }
 
     pub fn connected(self, c: bool) -> Self {
