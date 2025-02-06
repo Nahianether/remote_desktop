@@ -72,8 +72,7 @@ impl WSUsers {
     }
 
     pub fn to_ws(&self) -> Message {
-        // TODO
-        let users = serde_json::to_string(&WsMsgType::NewConn(self.clone())).unwrap();
+        let users = serde_json::to_string(self).unwrap();
         Message::Text(users.into())
     }
 }

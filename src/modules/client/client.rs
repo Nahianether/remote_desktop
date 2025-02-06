@@ -1,16 +1,15 @@
+use crate::{
+    helpers::enums::Mode,
+    modules::client::{
+        handler::ws_events::handle_ws_client_events,
+        validation::msg_validation::validate_client_message_type,
+    },
+};
 use anyhow::Result;
 use futures_util::StreamExt;
 use tokio_tungstenite::{
     connect_async,
     tungstenite::{client::IntoClientRequest, http::HeaderValue, Message},
-};
-
-use crate::{
-    helpers::enums::Mode,
-    modules::{
-        client::handler::ws_events::handle_ws_events,
-        server::validations::msg_validation::validate_message_type,
-    },
 };
 
 pub async fn run_client(client_id: &str, addr: &str) -> Result<()> {
@@ -39,9 +38,9 @@ pub async fn run_client(client_id: &str, addr: &str) -> Result<()> {
             Ok(msg) => {
                 println!("Received a message: {:?}", msg);
                 match msg.clone() {
-                    Message::Text(_) => match validate_message_type(msg.clone()) {
+                    Message::Text(_) => match validate_client_message_type(msg.clone()) {
                         Ok(message) => {
-                            handle_ws_events(&mut write, message, &addr).await?;
+                            handle_ws_client_events(&mut write, message, &addr).await?;
                         }
                         Err(e) => {
                             println!("{:?}", e)

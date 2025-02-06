@@ -6,11 +6,7 @@ use tokio_tungstenite::{
 };
 
 use crate::{
-    helpers::enums::Mode,
-    modules::{
-        client::handler::ws_events::handle_ws_events,
-        server::validations::msg_validation::validate_message_type,
-    },
+    helpers::enums::Mode, modules::server::validations::msg_validation::validate_message_type,
 };
 
 pub async fn run_admin(admin_id: &str, addr: &str) -> Result<()> {
@@ -38,18 +34,18 @@ pub async fn run_admin(admin_id: &str, addr: &str) -> Result<()> {
         match msg {
             Ok(msg) => {
                 println!("Received a message: {:?}", msg);
-                match msg.clone() {
-                    Message::Text(_) => match validate_message_type(msg.clone()) {
-                        Ok(message) => {
-                            handle_ws_events(&mut write, message, &addr).await?;
-                        }
-                        Err(e) => println!("{:?}", e),
-                    },
-                    Message::Binary(bytes) => {
-                        println!("Received a binary message: {:?}", bytes.len());
-                    }
-                    _ => println!("Received a non-text message: {:?}", msg),
-                }
+                // match msg.clone() {
+                //     Message::Text(_) => match validate_message_type(msg.clone()) {
+                //         Ok(message) => {
+                //             handle_ws_events(&mut write, message, &addr).await?;
+                //         }
+                //         Err(e) => println!("{:?}", e),
+                //     },
+                //     Message::Binary(bytes) => {
+                //         println!("Received a binary message: {:?}", bytes.len());
+                //     }
+                //     _ => println!("Received a non-text message: {:?}", msg),
+                // }
             }
             Err(e) => {
                 println!("Error reading message: {:?}", e);
