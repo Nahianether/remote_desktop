@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-use crate::models::{share::SSRequest, stream_data::SSStreamData, user::UserInfo};
+use crate::models::{
+    share::SSRequest,
+    stream_data::SSStreamData,
+    user::{UserInfo, WSUsers},
+};
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Mode {
     Server,
@@ -10,8 +14,8 @@ pub enum Mode {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum WsMsgType {
-    NewConn(UserInfo),
-    DisConn(UserInfo),
+    NewConn(WSUsers),
+    DisConn(WSUsers),
     Error(String),
     SSReq(SSRequest),
     SSStreamData(SSStreamData),

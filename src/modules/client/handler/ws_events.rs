@@ -26,6 +26,9 @@ pub async fn handle_ws_events(
                 SSReqType::Stop => {}
             }
         }
+        WsMsgType::NewConn(v) => {
+            println!("User connected: {:?}", v);
+        }
         _ => {}
     }
     Ok(())

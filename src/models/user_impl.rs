@@ -1,5 +1,5 @@
 use super::user::{UserInfo, WSUsers};
-use crate::helpers::enums::Mode;
+use crate::helpers::enums::{Mode, WsMsgType};
 use std::net::SocketAddr;
 use tokio_tungstenite::tungstenite::Message;
 
@@ -72,7 +72,8 @@ impl WSUsers {
     }
 
     pub fn to_ws(&self) -> Message {
-        let users = serde_json::to_string(self).unwrap();
+        // TODO
+        let users = serde_json::to_string(&WsMsgType::NewConn(self.clone())).unwrap();
         Message::Text(users.into())
     }
 }
