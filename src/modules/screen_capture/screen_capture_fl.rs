@@ -1,3 +1,4 @@
+use image::imageops::FilterType;
 use image::{load_from_memory, DynamicImage, ImageBuffer, Luma, Rgb, Rgba, RgbaImage};
 use scrap::{Capturer, Display};
 use std::io::Cursor;
@@ -66,12 +67,31 @@ fn save_rgb_image_from_bytes(bytes: Vec<u8>, width: u32, height: u32) {
 }
 
 fn image_compress(bytes: Vec<u8>, width: u32, height: u32) -> Vec<u8> {
+    print_image_size(bytes.clone());
+
     let rgb_img: ImageBuffer<image::Rgba<u8>, Vec<u8>> =
         ImageBuffer::from_raw(width, height, bytes)
             .expect("Failed to create image buffer from raw bytes");
 
-    let dynamic_img = DynamicImage::ImageRgba8(rgb_img);
+    let mut dynamic_img = DynamicImage::ImageRgba8(rgb_img);
+    dynamic_img = scale_to_fixed_height(&mut dynamic_img, 720);
 
     let r = dynamic_img.to_rgba8();
+    print_image_size(r.clone().into_raw());
     r.into_raw()
+}
+
+fn scale_to_fixed_height(img: &mut DynamicImage, target_height: u32) -> DynamicImage {
+    let (orig_width, orig_height) = (img.width() as u32, img.height() as u32);
+    let aspect_ratio = orig_width as f32 / orig_height as f32;
+    let new_width = (aspect_ratio * target_height as f32) as u32;
+    img.resize(new_width, target_height, FilterType::Lanczos3)
+}
+
+fn print_image_size(image_bytes: Vec<u8>) {
+    let size_in_bytes = image_bytes.len();
+    let size_in_kb = size_in_bytes as f64 / 1024.0;
+
+    println!("Image size: {:.2} KB", size_in_kb);
+    println!("Image size: {:.2} MB", size_in_kb / 1024.0);
 }
