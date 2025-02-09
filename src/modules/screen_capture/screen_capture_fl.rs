@@ -85,7 +85,8 @@ fn scale_to_fixed_height(img: &mut DynamicImage, target_height: u32) -> DynamicI
     let (orig_width, orig_height) = (img.width() as u32, img.height() as u32);
     let aspect_ratio = orig_width as f32 / orig_height as f32;
     let new_width = (aspect_ratio * target_height as f32) as u32;
-    img.resize(new_width, target_height, FilterType::Lanczos3)
+    println!("New width: {}", new_width);
+    img.resize(new_width, target_height, FilterType::Nearest)
 }
 
 fn print_image_size(image_bytes: Vec<u8>) {
