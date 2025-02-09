@@ -3,7 +3,7 @@ use anyhow::Result;
 use minifb::Window;
 use tokio_tungstenite::tungstenite::Bytes;
 
-pub async fn handle_admin_binary_events(
+pub fn handle_admin_binary_events(
     window: &mut Window,
     _writer: &mut WsUserWriter,
     bytes: Bytes,

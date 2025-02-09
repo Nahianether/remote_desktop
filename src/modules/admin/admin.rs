@@ -54,7 +54,7 @@ pub async fn run_admin(admin_id: &str, addr: &str) -> Result<()> {
                         }
                     },
                     Message::Binary(b) => {
-                        handle_admin_binary_events(&mut window, &mut write, b, &addr).await?;
+                        handle_admin_binary_events(&mut window, &mut write, b, &addr)?;
                     }
                     _ => {
                         println!("Received a non-text message: {:?}", msg);
@@ -70,8 +70,7 @@ pub async fn run_admin(admin_id: &str, addr: &str) -> Result<()> {
         // }
     }
 }
-
-fn get_window() -> Window {
+pub fn get_window() -> Window {
     let mut window = minifb::Window::new(
         "Remote Desktop Viewer",
         1920,
