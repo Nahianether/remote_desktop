@@ -1,5 +1,6 @@
-use image::{DynamicImage, ImageBuffer};
+use image::{load_from_memory, DynamicImage, ImageBuffer, Luma, Rgb, Rgba, RgbaImage};
 use scrap::{Capturer, Display};
+use std::io::Cursor;
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -40,44 +41,37 @@ pub fn capture_screen() -> Vec<u8> {
     }
 }
 
-fn print_image_size(pixel_data: &Vec<u8>) {
-    let image_size_bytes = pixel_data.len();
-    let image_size_kb = image_size_bytes as f64 / 1024.0;
-    let image_size_mb = image_size_kb / 1024.0;
-
-    println!("Vec<u8> size: {} bytes", image_size_bytes);
-    println!("Vec<u8> size: {:.2} KB", image_size_kb);
-    println!("Vec<u8> size: {:.2} MB", image_size_mb);
-}
-
 fn save_rgb_image_from_bytes(bytes: Vec<u8>, width: u32, height: u32) {
-    if bytes.len() != (width * height * 3) as usize {
-        panic!("Byte vector size does not match expected size: width * height * 3");
-    }
+    // let received_data: Vec<u32> = bytes
+    //     .chunks_exact(4)
+    //     .map(|chunk| u32::from_ne_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]))
+    //     .collect();
 
-    let rgb_img: ImageBuffer<image::Rgb<u8>, Vec<u8>> = ImageBuffer::from_raw(width, height, bytes)
-        .expect("Failed to create image buffer from raw bytes");
+    // let mut buffer = vec![0u32; 1920 * 1080];
 
-    // Convert the ImageBuffer to a DynamicImage
-    let dynamic_img = DynamicImage::ImageRgb8(rgb_img);
-    dynamic_img
-        .save("output_2.png")
-        .expect("Failed to save image");
+    // for i in 0..(1920 * 1080) {
+    //     let pixel = received_data[i];
+    //     let b = (pixel & 0xFF) as u32;
+    //     let g = ((pixel >> 8) & 0xFF) as u32;
+    //     let r = ((pixel >> 16) & 0xFF) as u32;
+    //     buffer[i] = (r << 16) | (g << 8) | b;
+    // }
+
+    let rgb_image: ImageBuffer<Rgba<u8>, Vec<u8>> = ImageBuffer::from_raw(width, height, bytes)
+        .expect("Failed to create RGB image from raw bytes");
+
+    rgb_image
+        .save("output_rgb.png")
+        .expect("Failed to save RGB image");
 }
 
 fn image_compress(bytes: Vec<u8>, width: u32, height: u32) -> Vec<u8> {
-    // Create an ImageBuffer from the raw RGB data
-    let rgb_img: ImageBuffer<image::Rgb<u8>, Vec<u8>> = ImageBuffer::from_raw(width, height, bytes)
-        .expect("Failed to create image buffer from raw bytes");
+    let rgb_img: ImageBuffer<image::Rgba<u8>, Vec<u8>> =
+        ImageBuffer::from_raw(width, height, bytes)
+            .expect("Failed to create image buffer from raw bytes");
 
-    // Convert the ImageBuffer to a DynamicImage
-    let dynamic_img = DynamicImage::ImageRgb8(rgb_img);
+    let dynamic_img = DynamicImage::ImageRgba8(rgb_img);
 
-    // Convert the DynamicImage to grayscale (Luma8)
-    let gray_img = dynamic_img.to_luma8();
-
-    // Get raw bytes of the grayscale image
-    let gray_bytes = gray_img.into_raw();
-
-    gray_bytes
+    let r = dynamic_img.to_rgba8();
+    r.into_raw()
 }
