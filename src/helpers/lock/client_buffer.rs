@@ -28,7 +28,7 @@ pub fn add_bytes_in_client_buffer(bytes: Vec<u8>) {
     match tx.send(bytes) {
         Ok(_) => {}
         Err(e) => {
-            eprintln!("{:?}", e);
+            eprintln!("Error to send bytes to broadcast{:?}", e);
         }
     }
 }

@@ -1,48 +1,38 @@
 use image::imageops::FilterType;
-use image::{load_from_memory, DynamicImage, ImageBuffer, Luma, Rgb, Rgba, RgbaImage};
+use image::{DynamicImage, ImageBuffer, Rgba};
 use scrap::{Capturer, Display};
-use std::io::Cursor;
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
-use crate::helpers::constraint::constraint::FPS_LIMIT;
 pub fn capture_screen() -> Vec<u8> {
     // Only send data of primary display
     let display = Display::primary().expect("Failed to find primary display");
     let (width, height): (u32, u32) = (display.width() as u32, display.height() as u32);
     let mut capturer = Capturer::new(display).expect("Failed to start screen capturing");
 
-    let frame_time = Duration::from_secs_f64(1.0 / FPS_LIMIT as f64);
-
-    loop {
-        let start_time = Instant::now();
-        match capturer.frame() {
-            Ok(buffer) => {
-                println!("Captured screen");
-                // print_image_size(&buffer.to_vec());
-                let buffer = image_compress(buffer.to_vec(), width, height);
-                // save_rgb_image_from_bytes(buffer, width, height);
-                // handle_admin_binary_events(&mut window, Bytes::from(buffer)).unwrap();
-                // return buffer.to_vec();
-                return buffer;
-            }
-            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                thread::sleep(Duration::from_millis(100));
-            }
-            Err(e) => {
-                eprintln!("Failed to capture screen: {:?}", e);
-                thread::sleep(Duration::from_millis(100));
-            }
+    match capturer.frame() {
+        Ok(buffer) => {
+            println!("Captured screen");
+            // print_image_size(&buffer.to_vec());
+            let buffer = image_compress(buffer.to_vec(), width, height);
+            // save_rgb_image_from_bytes(buffer, width, height);
+            // handle_admin_binary_events(&mut window, Bytes::from(buffer)).unwrap();
+            // return buffer.to_vec();
+            return buffer;
         }
-
-        let elapsed = start_time.elapsed();
-        if elapsed < frame_time {
-            thread::sleep(frame_time - elapsed);
+        Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+            thread::sleep(Duration::from_millis(100));
+            return vec![];
+        }
+        Err(e) => {
+            eprintln!("Failed to capture screen: {:?}", e);
+            thread::sleep(Duration::from_millis(100));
+            return vec![];
         }
     }
 }
 
-fn save_rgb_image_from_bytes(bytes: Vec<u8>, width: u32, height: u32) {
+pub fn save_rgb_image_from_bytes(bytes: Vec<u8>, width: u32, height: u32) {
     // let received_data: Vec<u32> = bytes
     //     .chunks_exact(4)
     //     .map(|chunk| u32::from_ne_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]))

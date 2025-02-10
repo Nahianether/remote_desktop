@@ -61,7 +61,7 @@ pub async fn run_client(client_id: &str, addr: &str) -> Result<()> {
           Ok(buffer) = buffer_receiver.recv() => {
             let b= buffer;
             match write.send(Message::binary(b)).await{
-                Ok(_) => {}
+                Ok(_) => println!("bynary message sent"),
                 Err(e) => println!("Error sending message to ws: {:?}", e)
             }
           }

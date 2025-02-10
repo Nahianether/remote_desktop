@@ -1,4 +1,4 @@
-use super::oncelock::BROADCAST_SENDER;
+use super::oncelock::{BROADCAST_SENDER, CLIENT_BROADCAST_ENABLE};
 use crate::helpers::enums::SSReqType;
 use indexmap::IndexMap;
 use std::sync::Mutex;
@@ -66,4 +66,15 @@ pub fn ss_broadcast_is_active(client: &str) -> bool {
         .unwrap();
 
     set.contains_key(client)
+}
+
+pub fn set_client_boradcast_enable(enable: bool) {
+    CLIENT_BROADCAST_ENABLE.get_or_init(|| Mutex::new(enable));
+}
+
+pub fn get_client_boradcast_enable() -> bool {
+    *CLIENT_BROADCAST_ENABLE
+        .get_or_init(|| Mutex::new(false))
+        .lock()
+        .unwrap()
 }
