@@ -7,8 +7,8 @@ pub mod run;
 
 #[tokio::main]
 async fn main() {
-    // run::run().await;
-    task();
+    run::run().await;
+    // task();
 }
 
 fn task() {
