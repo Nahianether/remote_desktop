@@ -69,7 +69,8 @@ pub fn ss_broadcast_is_active(client: &str) -> bool {
 }
 
 pub fn set_client_boradcast_enable(enable: bool) {
-    CLIENT_BROADCAST_ENABLE.get_or_init(|| Mutex::new(enable));
+    let v = CLIENT_BROADCAST_ENABLE.get_or_init(|| Mutex::new(enable));
+    *v.lock().unwrap() = enable;
 }
 
 pub fn get_client_boradcast_enable() -> bool {

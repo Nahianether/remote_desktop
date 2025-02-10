@@ -4,30 +4,35 @@ use scrap::{Capturer, Display};
 use std::thread;
 use std::time::Duration;
 
+use crate::helpers::lock::broad_cast::get_client_boradcast_enable;
+
 pub fn capture_screen() -> Vec<u8> {
     // Only send data of primary display
     let display = Display::primary().expect("Failed to find primary display");
     let (width, height): (u32, u32) = (display.width() as u32, display.height() as u32);
     let mut capturer = Capturer::new(display).expect("Failed to start screen capturing");
+    loop {
+        if get_client_boradcast_enable() == false {
+            break vec![];
+        }
 
-    match capturer.frame() {
-        Ok(buffer) => {
-            println!("Captured screen");
-            // print_image_size(&buffer.to_vec());
-            let buffer = image_compress(buffer.to_vec(), width, height);
-            // save_rgb_image_from_bytes(buffer, width, height);
-            // handle_admin_binary_events(&mut window, Bytes::from(buffer)).unwrap();
-            // return buffer.to_vec();
-            return buffer;
-        }
-        Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-            thread::sleep(Duration::from_millis(100));
-            return vec![];
-        }
-        Err(e) => {
-            eprintln!("Failed to capture screen: {:?}", e);
-            thread::sleep(Duration::from_millis(100));
-            return vec![];
+        match capturer.frame() {
+            Ok(buffer) => {
+                println!("Captured screen");
+                // print_image_size(&buffer.to_vec());
+                let buffer = image_compress(buffer.to_vec(), width, height);
+                // save_rgb_image_from_bytes(buffer, width, height);
+                // handle_admin_binary_events(&mut window, Bytes::from(buffer)).unwrap();
+                // return buffer.to_vec();
+                return buffer;
+            }
+            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                thread::sleep(Duration::from_millis(100));
+            }
+            Err(e) => {
+                eprintln!("Failed to capture screen: {:?}", e);
+                thread::sleep(Duration::from_millis(100));
+            }
         }
     }
 }
