@@ -5,7 +5,6 @@ use std::{
 
 use futures_util::SinkExt;
 use scrap::Display;
-use tokio::runtime::Runtime;
 
 use crate::{
     helpers::{
@@ -20,7 +19,7 @@ use crate::{
     modules::screen_capture::screen_capture_fl::capture_screen,
 };
 
-pub fn client_ss_start(writer: &mut WsUserWriter) {
+pub async fn client_ss_start(writer: &mut WsUserWriter) {
     match Display::primary() {
         Ok(display) => {
             let ss_res = SSReqRes::new(
@@ -29,10 +28,10 @@ pub fn client_ss_start(writer: &mut WsUserWriter) {
                 None,
                 Some((display.width(), display.height())),
             );
-            Runtime::new()
-                .unwrap()
-                .block_on(async { writer.send(ss_res.to_ws().unwrap()).await })
-                .unwrap(); // sending the frame size to the server
+            match writer.send(ss_res.to_ws().unwrap()).await {
+                Ok(_) => {}
+                Err(e) => eprintln!("Failed to send SSRes message: {:?}", e),
+            }
 
             set_client_boradcast_enable(true);
 

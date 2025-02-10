@@ -17,7 +17,7 @@ pub async fn handle_ws_client_events(
         WsMsgType::SSReq(v) => {
             println!("Received a SSReq message: {:?}", v);
             match v.ss_req_type.unwrap() {
-                SSReqType::Start => client_ss_start(writer),
+                SSReqType::Start => client_ss_start(writer).await,
                 SSReqType::Stop => {
                     set_client_boradcast_enable(false);
                 }
