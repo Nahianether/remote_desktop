@@ -5,3 +5,4 @@ pub const WS_AUTH: &str = "authorization";
 pub const SS_STREAM: &str = "ss_stream";
 pub const NEW_CONN: &str = "newConn";
 pub const USERS: &str = "users";
+pub const BUFFER: &str = "buffer";

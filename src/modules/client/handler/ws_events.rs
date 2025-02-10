@@ -1,13 +1,12 @@
 use crate::{
     helpers::{
         enums::{SSReqType, WsMsgType},
+        lock::client_buffer::get_client_buffer_sender,
         types::WsUserWriter,
     },
     modules::screen_capture::screen_capture_fl::capture_screen,
 };
 use anyhow::Result;
-use futures_util::SinkExt;
-use tokio_tungstenite::tungstenite::Message;
 
 pub async fn handle_ws_client_events(
     writer: &mut WsUserWriter,
@@ -20,7 +19,11 @@ pub async fn handle_ws_client_events(
             match v.ss_req_type.unwrap() {
                 SSReqType::Start => loop {
                     let screen_data = capture_screen();
-                    writer.send(Message::binary(screen_data)).await?;
+                    let sender = get_client_buffer_sender();
+                    match sender.send(screen_data) {
+                        Ok(_) => {}
+                        Err(e) => println!("Error to send byts to broadcast : {:?}", e),
+                    }
                 },
                 SSReqType::Stop => {}
             }
