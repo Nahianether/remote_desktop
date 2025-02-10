@@ -9,7 +9,7 @@ use crate::{
 use anyhow::Result;
 
 pub async fn handle_ws_client_events(
-    _writer: &mut WsUserWriter,
+    writer: &mut WsUserWriter,
     message: WsMsgType,
     _addr: &str,
 ) -> Result<()> {
@@ -17,7 +17,7 @@ pub async fn handle_ws_client_events(
         WsMsgType::SSReq(v) => {
             println!("Received a SSReq message: {:?}", v);
             match v.ss_req_type.unwrap() {
-                SSReqType::Start => client_ss_start(),
+                SSReqType::Start => client_ss_start(writer),
                 SSReqType::Stop => {
                     set_client_boradcast_enable(false);
                 }

@@ -8,7 +8,7 @@ use tokio_tungstenite::{
 
 use crate::{
     helpers::enums::{Mode, SSReqType},
-    models::share::SSRequest,
+    models::share::SSReqRes,
     modules::admin::{
         handler::{
             handle_binary_events::handle_admin_binary_events, ws_events::handle_ws_admin_events,
@@ -32,7 +32,13 @@ pub async fn run_admin(admin_id: &str, addr: &str) -> Result<()> {
 
     let (mut write, mut read) = stream.split();
 
-    let msg = SSRequest::new("ss_request", SSReqType::Start, "1@client.user").to_ws()?;
+    let msg = SSReqRes::new(
+        "ss_request",
+        Some(SSReqType::Start),
+        Some("1@client.user".to_string()),
+        None,
+    )
+    .to_ws()?;
 
     write.send(msg).await.unwrap();
     let mut window = get_window();

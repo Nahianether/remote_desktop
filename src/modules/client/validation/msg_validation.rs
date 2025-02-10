@@ -4,7 +4,7 @@ use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
     helpers::{constraint::flags as FLAG, enums::WsMsgType},
-    models::{share::SSRequest, stream_data::SSStreamData, user::WSUsers},
+    models::{share::SSReqRes, stream_data::SSStreamData, user::WSUsers},
 };
 
 pub fn validate_client_message_type(msg: Message) -> Result<WsMsgType> {
@@ -24,7 +24,7 @@ pub fn validate_client_message_type(msg: Message) -> Result<WsMsgType> {
                 }
             }
             FLAG::SS_REQUEST => {
-                let r: Result<SSRequest, _> = from_value(value);
+                let r: Result<SSReqRes, _> = from_value(value);
                 match r {
                     Ok(message) => {
                         // ss_req_validation(&message)?;
