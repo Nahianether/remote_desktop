@@ -8,7 +8,7 @@ mod broadcast_test {
     };
 
     #[test]
-    #[ignore]
+    #[ignore = "pass"]
     fn a_r_ss_r_b() {
         let admins = get_ss_broadcast_admins(&"client_1".to_string());
         assert_eq!(admins, None);

@@ -2,10 +2,7 @@ use crate::{
     helpers::{
         enum_impl::WsMsgTypeExt,
         enums::WsMsgType,
-        lock::{
-            broad_cast::add_remove_ss_req_broadcast,
-            users::{get_user_and_sender, get_user_by_email},
-        },
+        lock::users::{get_user_and_sender, get_user_by_email},
     },
     models::share::SSReqRes,
 };
@@ -14,7 +11,7 @@ use std::net::SocketAddr;
 
 pub async fn handle_ss_req(ss_req: &SSReqRes, addr: &SocketAddr) -> Result<()> {
     match get_user_and_sender(*addr) {
-        Some((admin_user, admin_sender)) => {
+        Some((_, admin_sender)) => {
             match get_user_by_email(ss_req.client_id.clone().unwrap().as_str()) {
                 Some((_, s)) => {
                     let msg = ss_req.clone().client_id(None).to_ws()?;

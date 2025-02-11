@@ -16,40 +16,42 @@ pub fn validate_message_type(msg: Message) -> Result<WsMsgType> {
     let msg = msg.to_string();
     let parsed: Result<Value, _> = from_str(&msg.clone());
     match parsed {
-        Ok(value) => match value["flag"].as_str().unwrap() {
-            FLAG::SS_REQUEST => {
-                let r: Result<SSReqRes, _> = from_value(value);
-                match r {
-                    Ok(message) => {
-                        ss_req_validation(&message)?;
-                        Ok(WsMsgType::SSReq(message))
+        Ok(value) => match value["flag"].as_str() {
+            Some(flag) => match flag {
+                FLAG::SS_REQUEST => {
+                    let r: Result<SSReqRes, _> = from_value(value);
+                    match r {
+                        Ok(message) => {
+                            ss_req_validation(&message)?;
+                            Ok(WsMsgType::SSReq(message))
+                        }
+                        Err(e) => bail!("Failed to parse text message: {:?}", e),
                     }
-                    Err(_) => bail!("Failed to parse text message"),
                 }
-            }
-            FLAG::SS_RESPONSE => {
-                let r: Result<SSReqRes, _> = from_value(value);
-                match r {
-                    Ok(message) => {
-                        ss_res_validation(&message)?;
-                        Ok(WsMsgType::SSFramSize(message))
+                FLAG::SS_RESPONSE => {
+                    let r: Result<SSReqRes, _> = from_value(value);
+                    match r {
+                        Ok(message) => {
+                            ss_res_validation(&message)?;
+                            Ok(WsMsgType::SSFramSize(message))
+                        }
+                        Err(e) => bail!("Failed to parse text message: {:?}", e),
                     }
-                    Err(_) => bail!("Failed to parse text message"),
                 }
-            }
-            FLAG::SS_STREAM => {
-                let r: Result<SSStreamData, _> = from_value(value);
-                match r {
-                    Ok(message) => {
-                        ss_stream_validation(&message)?;
-                        Ok(WsMsgType::SSStreamData(message))
+                FLAG::SS_STREAM => {
+                    let r: Result<SSStreamData, _> = from_value(value);
+                    match r {
+                        Ok(message) => {
+                            ss_stream_validation(&message)?;
+                            Ok(WsMsgType::SSStreamData(message))
+                        }
+                        Err(e) => bail!("Failed to parse text message: {:?}", e),
                     }
-                    Err(_) => bail!("Failed to parse text message"),
                 }
-            }
-
-            _ => bail!("Invalid flag"),
+                _ => bail!("Flag not found: {:?}", flag),
+            },
+            None => bail!("The flag is invalid : {:?}", value["flag"].as_str()),
         },
-        Err(_) => bail!("Failed to decode message"),
+        Err(e) => bail!("Failed to decode message: {:?}", e),
     }
 }
