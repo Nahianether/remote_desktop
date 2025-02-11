@@ -12,9 +12,7 @@ pub async fn handle_ss_stream(msg: Message, addr: &SocketAddr) -> Result<()> {
             Some(admins) => {
                 for sender in get_all_u_senders_by_emails(admins) {
                     match sender.send(msg.clone()) {
-                        Ok(_) => {
-                            println!("Sent bytes to: {:?}", sender);
-                        }
+                        Ok(_) => {}
                         Err(e) => println!("Error sending bytes: {:?}", e),
                     }
                 }
