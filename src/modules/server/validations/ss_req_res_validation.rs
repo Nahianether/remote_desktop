@@ -20,10 +20,6 @@ pub fn ss_req_validation(v: &SSReqRes) -> Result<()> {
 
 pub fn ss_res_validation(v: &SSReqRes) -> Result<()> {
     let mut err = vec![];
-    if v.ss_req_type.is_none() {
-        err.push("ssReqType is required");
-    }
-
     if v.frame_size.is_none() {
         err.push("frameSize is required");
     }
