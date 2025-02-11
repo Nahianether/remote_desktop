@@ -17,7 +17,6 @@ mod broadcast_test {
             "admin_1".to_string(),
             "client_1".to_string(),
             SSReqType::Start,
-            (1920, 1080),
         );
         let r1 = get_ss_broadcast_admins(&"client_1".to_string());
         assert_eq!(r1, Some(vec!["admin_1".to_string()]));
@@ -26,7 +25,6 @@ mod broadcast_test {
             "admin_2".to_string(),
             "client_1".to_string(),
             SSReqType::Start,
-            (1920, 1080),
         );
         let r2 = get_ss_broadcast_admins(&"client_1".to_string());
         assert_eq!(r2, Some(vec!["admin_1".to_string(), "admin_2".to_string()]));
@@ -35,7 +33,6 @@ mod broadcast_test {
             "admin_2".to_string(),
             "client_1".to_string(),
             SSReqType::Stop,
-            (1920, 1080),
         );
         let r3 = get_ss_broadcast_admins(&"client_1".to_string());
         assert_eq!(r3, Some(vec!["admin_1".to_string()]));
@@ -44,7 +41,6 @@ mod broadcast_test {
             "admin_1".to_string(),
             "client_1".to_string(),
             SSReqType::Stop,
-            (1920, 1080),
         );
         let r4 = get_ss_broadcast_admins(&"client_1".to_string());
         assert_eq!(r4, None);

@@ -43,6 +43,19 @@ pub fn add_socket_addr(addr: SocketAddr, user: Option<UserInfo>, u_sender: Optio
     set.insert(addr, (u, s));
 }
 
+pub fn update_client_frame_size(client_id: &str, frame_size: Option<(usize, usize)>) {
+    let mut set = SOCKET_ADDRS
+        .get_or_init(|| Mutex::new(IndexMap::new()))
+        .lock()
+        .unwrap();
+    for (_, (u, _)) in set.iter_mut() {
+        if u.clone().unwrap().user_id.is_some() && u.clone().unwrap().user_id.unwrap() == client_id
+        {
+            u.as_mut().unwrap().frame_size = frame_size;
+        }
+    }
+}
+
 pub fn remove_socket_addr(addr: &SocketAddr) {
     let mut set = SOCKET_ADDRS
         .get_or_init(|| Mutex::new(IndexMap::new()))

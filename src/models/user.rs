@@ -13,6 +13,8 @@ pub struct UserInfo {
     pub user_mode: Option<Mode>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub addr: Option<SocketAddr>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub frame_size: Option<(usize, usize)>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
