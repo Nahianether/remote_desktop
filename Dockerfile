@@ -46,7 +46,7 @@ COPY --from=builder /usr/src/remote-desktop/target/release/remote_desktop /usr/l
 RUN chmod +x /usr/local/bin/remote_desktop
 
 # Expose the port your application uses
-EXPOSE 8180
+EXPOSE 8080
 
 # Set the entry point and default command
 ENTRYPOINT ["/usr/local/bin/remote_desktop"]
