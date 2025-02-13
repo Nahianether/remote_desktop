@@ -11,7 +11,7 @@ use crate::modules::server::connection::close_connection_notify;
 // }
 
 pub fn live_server_ip_address() -> SocketAddr {
-    SocketAddr::from(([0, 0, 0, 0], 8080))
+    SocketAddr::from(([0, 0, 0, 0], 80))
 }
 
 pub fn ws_disconnected(addr: &SocketAddr, msg: Message) -> anyhow::Result<bool> {
