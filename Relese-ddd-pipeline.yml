@@ -29,17 +29,7 @@ spec:
           limits:
             cpu: "500m"
             memory: "1Gi" 
-        env:
-        - name: #{AppEnvName}#
-          value: #{AppEnvValue}#
-        - name:  "ConnectionString"
-          value:  #{ConnectionString}#
-        - name: "REACT_APP_KEY_NAME"
-          value: #{REACT_APP_KEY_NAME}#
-        - name:  "REACT_APP_IV_NAME"
-          value:  #{REACT_APP_IV_NAME}#
-        - name:  "REACT_APP_SECRET_NAME"
-          value:  #{REACT_APP_SECRET_NAME}#
+
       imagePullSecrets:
       - name: dockercred
 
