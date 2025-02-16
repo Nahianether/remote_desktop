@@ -13,23 +13,34 @@ pub async fn handle_ws_error(
     e: &Error,
 ) -> Result<bool> {
     println!("Error reading message from {}: {:?}", addr, e);
-    if let Error::Protocol(protocol_error) = e {
-        if *protocol_error
-            == tokio_tungstenite::tungstenite::error::ProtocolError::ResetWithoutClosingHandshake
-        {
-            println!("Connection reset without closing handshake: {}", addr);
-            remove_socket_addr(&addr);
-            // sned_ws_message(WsMsgType::Error("Connection Closed".to_string()), &addr).await?;
-            ws_writer
-                .send(Message::Text(
-                    WsMsgType::Error("Connection Closed".to_string())
-                        .to_json()?
-                        .into(),
-                ))
-                .await
-                .ok();
-        }
+
+    let (close, err_msg) = match *e {
+        Error::ConnectionClosed => (true, "Connection closed"),
+        Error::Io(_) => (true, "IO error"),
+        Error::Protocol(_) => (true, "Protocol error"),
+        Error::WriteBufferFull(_) => (true, "Write buffer full"),
+        Error::Utf8 => (false, "UTF-8 error"),
+        Error::Url(_) => (false, "URL error"),
+        Error::Http(_) => (false, "HTTP error"),
+        Error::Capacity(_) => (false, "Capacity error"),
+        Error::AlreadyClosed => (false, "Already closed"),
+        Error::AttackAttempt => (false, "Attack attempt"),
+        Error::HttpFormat(_) => (false, "HTTP format error"),
+        Error::Tls(_) => (false, "TLS error"),
+    };
+    println!("Error: {}", err_msg);
+    if close {
+        remove_socket_addr(&addr);
+        ws_writer
+            .send(Message::Text(
+                WsMsgType::Error(format!("Connection Closed with : {}", err_msg))
+                    .to_json()?
+                    .into(),
+            ))
+            .await
+            .ok();
     }
+
     Ok(false)
 }
 

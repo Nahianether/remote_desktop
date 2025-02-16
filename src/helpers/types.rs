@@ -21,7 +21,10 @@ pub type IndexMapType = IndexMap<SocketAddr, UserAndUSender>;
 pub type SocketIndexMap = OnceLock<Mutex<IndexMapType>>;
 pub type WsWriter = SplitSink<WebSocketStream<TcpStream>, Message>;
 
-pub type BroadcastType = IndexMap<String, (Vec<String>, broadcast::Sender<Vec<u8>>)>;
+pub type BroadcastType = IndexMap<String, Vec<String>>;
 pub type BroadcastIndexMap = OnceLock<Mutex<BroadcastType>>;
 
 pub type WsUserWriter = SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>;
+
+pub type ClientBufferType = IndexMap<String, broadcast::Sender<Vec<u8>>>;
+pub type ClientBuffer = OnceLock<Mutex<ClientBufferType>>;

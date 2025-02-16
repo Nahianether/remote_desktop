@@ -13,14 +13,21 @@ impl UserInfo {
             user_id: None,
             user_mode: None,
             addr: None,
+            frame_size: None,
         }
     }
 
-    pub fn new(user_id: Option<String>, user_mode: Option<Mode>, addr: Option<SocketAddr>) -> Self {
+    pub fn new(
+        user_id: Option<String>,
+        user_mode: Option<Mode>,
+        addr: Option<SocketAddr>,
+        frame_size: Option<(usize, usize)>,
+    ) -> Self {
         Self {
             user_id,
             user_mode,
             addr,
+            frame_size,
         }
     }
 

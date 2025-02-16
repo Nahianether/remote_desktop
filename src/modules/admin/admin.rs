@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use futures_util::{SinkExt, StreamExt};
 use minifb::Window;
 use tokio_tungstenite::{
@@ -8,7 +8,7 @@ use tokio_tungstenite::{
 
 use crate::{
     helpers::enums::{Mode, SSReqType},
-    models::share::SSRequest,
+    models::share::SSReqRes,
     modules::admin::{
         handler::{
             handle_binary_events::handle_admin_binary_events, ws_events::handle_ws_admin_events,
@@ -28,50 +28,57 @@ pub async fn run_admin(admin_id: &str, addr: &str) -> Result<()> {
         HeaderValue::from_str(Mode::Client.to_string().as_str()).unwrap(),
     );
 
-    let (stream, _) = connect_async(request).await.unwrap();
+    match connect_async(request).await {
+        Ok((stream, _)) => {
+            let (mut write, mut read) = stream.split();
 
-    let (mut write, mut read) = stream.split();
+            let msg = SSReqRes::new(
+                "ss_request",
+                Some(SSReqType::Start),
+                Some("1@client.user".to_string()),
+                None,
+            )
+            .to_ws()?;
 
-    let msg = SSRequest::new("ss_request", SSReqType::Start, "1@client.user").to_ws()?;
+            write.send(msg).await.unwrap();
+            let mut window = get_window();
 
-    write.send(msg).await.unwrap();
-    let mut window = get_window();
-
-    loop {
-        // tokio::select! {
-        //   Some(msg)= read.next() =>{
-        let msg = read.next().await.unwrap();
-        match msg {
-            Ok(msg) => {
-                // println!("Received a message: {:?}", msg);
-                match msg.clone() {
-                    Message::Text(_) => match validate_admin_message_type(msg.clone()) {
-                        Ok(message) => {
-                            handle_ws_admin_events(&mut write, message, &addr).await?;
+            loop {
+                // tokio::select! {
+                //   Some(msg)= read.next() =>{
+                if let Some(msg) = read.next().await {
+                    match msg {
+                        Ok(msg) => {
+                            // println!("Received a message: {:?}", msg);
+                            match msg.clone() {
+                                Message::Text(_) => {
+                                    match validate_admin_message_type(msg.clone()) {
+                                        Ok(message) => {
+                                            handle_ws_admin_events(&mut write, message, &addr)
+                                                .await?;
+                                        }
+                                        Err(e) => println!("{:?}", e),
+                                    }
+                                }
+                                Message::Binary(b) => {
+                                    handle_admin_binary_events(&mut window, &mut write, b, &addr)?;
+                                }
+                                _ => println!("Received a non-text message: {:?}", msg),
+                            }
                         }
                         Err(e) => {
-                            println!("{:?}", e)
+                            println!("Error reading message: {:?}", e);
+                            break Ok(());
                         }
-                    },
-                    Message::Binary(b) => {
-                        handle_admin_binary_events(&mut window, &mut write, b, &addr).await?;
-                    }
-                    _ => {
-                        println!("Received a non-text message: {:?}", msg);
                     }
                 }
             }
-            Err(e) => {
-                println!("Error reading message: {:?}", e);
-                break Ok(());
-            }
         }
-        //   }
-        // }
+        Err(e) => bail!("Error connecting to server: {:?}", e),
     }
 }
 
-fn get_window() -> Window {
+pub fn get_window() -> Window {
     let mut window = minifb::Window::new(
         "Remote Desktop Viewer",
         1920,

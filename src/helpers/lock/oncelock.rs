@@ -4,10 +4,12 @@ use std::{
 };
 
 use crate::{
-    helpers::types::{BroadcastIndexMap, SocketIndexMap},
+    helpers::types::{BroadcastIndexMap, ClientBuffer, SocketIndexMap},
     models::user::UserInfo,
 };
 
 pub static SOCKET_ADDRS: SocketIndexMap = OnceLock::new();
 pub static CURRENT_USER: OnceLock<Mutex<HashSet<UserInfo>>> = OnceLock::new();
 pub static BROADCAST_SENDER: BroadcastIndexMap = OnceLock::new();
+pub static CLIENT_BUFFER: ClientBuffer = OnceLock::new();
+pub static CLIENT_BROADCAST_ENABLE: OnceLock<Mutex<bool>> = OnceLock::new();

@@ -1,14 +1,15 @@
-use super::share::SSRequest;
+use super::share::SSReqRes;
 use crate::helpers::enums::SSReqType;
 use anyhow::Result;
 use tokio_tungstenite::tungstenite::Message;
 
-impl SSRequest {
+impl SSReqRes {
     pub fn default() -> Self {
         Self {
             ss_req_type: None,
             client_id: None,
             flag: None,
+            frame_size: None,
         }
     }
 
@@ -26,11 +27,17 @@ impl SSRequest {
         Ok(Message::Text(serde_json::to_string(&self)?.into()))
     }
 
-    pub fn new(f: &str, t: SSReqType, client_id: &str) -> Self {
+    pub fn new(
+        f: &str,
+        ss_req_type: Option<SSReqType>,
+        client_id: Option<String>,
+        frame_size: Option<(usize, usize)>,
+    ) -> Self {
         Self {
             flag: Some(f.to_string()),
-            client_id: Some(client_id.to_string()),
-            ss_req_type: Some(t),
+            client_id,
+            ss_req_type,
+            frame_size,
         }
     }
 }

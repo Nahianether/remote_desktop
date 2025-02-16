@@ -1,13 +1,12 @@
 use crate::{
     helpers::{
         enums::{SSReqType, WsMsgType},
+        lock::broad_cast::set_client_boradcast_enable,
         types::WsUserWriter,
     },
-    modules::screen_capture::screen_capture_fl::capture_screen,
+    modules::client::handler::ss_start::client_ss_start,
 };
 use anyhow::Result;
-use futures_util::SinkExt;
-use tokio_tungstenite::tungstenite::Message;
 
 pub async fn handle_ws_client_events(
     writer: &mut WsUserWriter,
@@ -18,11 +17,10 @@ pub async fn handle_ws_client_events(
         WsMsgType::SSReq(v) => {
             println!("Received a SSReq message: {:?}", v);
             match v.ss_req_type.unwrap() {
-                SSReqType::Start => loop {
-                    let screen_data = capture_screen();
-                    writer.send(Message::binary(screen_data)).await?;
-                },
-                SSReqType::Stop => {}
+                SSReqType::Start => client_ss_start(writer).await,
+                SSReqType::Stop => {
+                    set_client_boradcast_enable(false);
+                }
             }
         }
         WsMsgType::NewConn(v) => {
