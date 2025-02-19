@@ -1,54 +1,55 @@
-# Use the official Rust image as a base image
+
 FROM rust:latest AS builder
 
-# Install system dependencies for X11 and windowing
+WORKDIR /usr/src/app
+
+# Install necessary build dependencies
 RUN apt-get update && apt-get install -y \
-    libxcb-randr0-dev \
+    pkg-config \
     libx11-dev \
+    libxcb1-dev \
+    libxcb-randr0-dev \
+    libxcb-shape0-dev \
+    libxcb-xfixes0-dev \
+    libxcb-shm0-dev \
     libxrandr-dev \
+    libxinerama-dev \
+    libxcursor-dev \
     libxi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory
-WORKDIR /usr/src/remote-desktop
-
-# Copy Cargo.toml and Cargo.lock for dependency caching
-COPY Cargo.toml Cargo.lock ./
-
-# Create dummy source files for dependency caching
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release
-RUN rm -rf src
-
-# Copy the actual source code
+# Copy the entire project
 COPY . .
 
-# Build the project
+# Build the application in release mode
 RUN cargo build --release
 
-# Use Debian Bookworm (which has glibc 2.36)
+# === Runtime Stage ===
+# Use a newer base image with updated glibc (Debian Bookworm)
 FROM debian:bookworm-slim
+
+WORKDIR /app
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
-    libxcb1 \
     libx11-6 \
-    libxrandr2 \
-    libxi6 \
-    libxcb-shm0 \
+    libxcb1 \
     libxcb-randr0 \
+    libxcb-shape0 \
+    libxcb-xfixes0 \
+    libxcb-shm0 \
+    libxrandr2 \
+    libxinerama1 \
+    libxcursor1 \
+    libxi6 \
+    libssl3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the built binary from the builder stage
-COPY --from=builder /usr/src/remote-desktop/target/release/remote_desktop /usr/local/bin/remote_desktop
+# Copy the compiled binary from the builder stage
+COPY --from=builder /usr/src/app/target/release/remote_desktop /app/server
 
-# Ensure the binary is executable
-RUN chmod +x /usr/local/bin/remote_desktop
+# Expose the port used by your application
+EXPOSE 8085
 
-# Expose the port your application uses
-EXPOSE 80
-EXPOSE 443
-
-# Set the entry point and default command
-ENTRYPOINT ["/usr/local/bin/remote_desktop"]
-CMD ["server"]
+# Run the server binary (adjust the command-line arguments if needed)
+CMD ["/app/server", "server"]
