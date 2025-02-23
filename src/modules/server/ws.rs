@@ -38,8 +38,7 @@ pub async fn handle_connection(raw_stream: TcpStream, addr: SocketAddr) -> Resul
         tokio_tungstenite::accept_hdr_async(raw_stream, |req: &Request, res: Response| {
             conn_validation(req, res, addr)
         })
-        .await
-        .expect("Error during the websocket handshake occurred");
+        .await?;
     println!("WebSocket connection established: {}", addr);
 
     let (tx, mut rx) = unbounded_channel::<Message>();
