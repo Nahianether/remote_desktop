@@ -25,6 +25,7 @@ pub async fn run_ws() {
     match ws_config().await {
         Ok(listener) => {
             while let Ok((stream, addr)) = listener.accept().await {
+                _ = stream.set_ttl(1000);
                 tokio::task::spawn(async move { handle_connection(stream, addr).await });
             }
         }
